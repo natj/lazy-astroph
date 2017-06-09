@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python
 
 from __future__ import print_function
 
@@ -11,6 +11,8 @@ import shlex
 import smtplib
 import subprocess
 import sys
+import yagmail
+
 
 # python 2 and 3 do different things with urllib
 try:
@@ -18,7 +20,9 @@ try:
 except ImportError:
     from urllib2 import urlopen
 
-from email.mime.text import MIMEText
+#from email.mime.text import MIMEText
+
+
 
 class Paper(object):
     """a Paper is a single paper listed on arXiv.  In addition to the
@@ -182,6 +186,12 @@ class AstrophQuery(object):
 
         return results, latest_id
 
+def report_yag(body, subject, sender, receiver):
+    """ send an email using the gmail SMTP server"""
+
+    yag = yagmail.SMTP() #assumes the account name is in ~/.yagmail
+    yag.send(receiver, subject, body)
+
 
 def report(body, subject, sender, receiver):
     """ send an email """
@@ -195,6 +205,7 @@ def report(body, subject, sender, receiver):
         sm.sendmail(sender, receiver, msg.as_string())
     except smtplib.SMTPException:
         sys.exit("ERROR sending mail")
+
 
 
 def search_astroph(keywords, old_id=None):
@@ -240,7 +251,7 @@ def send_email(papers, mail=None):
     # e-mail it
     if not len(papers) == 0:
         if not mail is None:
-            report(body.encode("ascii","replace"), "astro-ph papers of interest",
+            report_yag(body.encode("ascii","replace"), "astro-ph papers of interest",
                    "lazy-astroph@localhost <lazy-astroph search>", mail)
         else:
             print(body)
